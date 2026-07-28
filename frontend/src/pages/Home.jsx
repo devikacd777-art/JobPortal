@@ -64,10 +64,9 @@ function Home() {
                 {job.salary && <span className="tag tag-salary">${job.salary}</span>}
               </p>
 
-              <button className="btn" onClick={() => handleApply(job._id)}>
-                Apply
-              </button>
-              {message[job._id] && <p style={{ marginTop: '0.5rem' }}>{message[job._id]}</p>}
+             <Link to={`/jobs/${job._id}`}>
+  <button className="btn">View & Apply</button>
+</Link>
             </div>
           ))}
         </div>

@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import axios from 'axios';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const location = useLocation();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -18,11 +19,16 @@ function Login() {
       });
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('user', JSON.stringify(res.data.user));
-     if (res.data.user.role === 'admin') {
-  navigate('/admin/dashboard');
-} else {
-  navigate('/');
-}
+    const from = location.state?.from;
+      if (from) {
+        navigate(from);
+      } else if (res.data.user.role === 'admin') {
+        navigate('/admin/dashboard');
+      } else if (res.data.user.role === 'employer') {
+        navigate('/recruiter/dashboard');
+      } else {
+        navigate('/');
+      }
     } catch (err) {
       setError(err.response?.data?.message || 'Something went wrong');
     }

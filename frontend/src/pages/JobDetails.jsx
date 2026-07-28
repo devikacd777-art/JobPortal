@@ -1,14 +1,18 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 
 function JobDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [applyMessage, setApplyMessage] = useState('');
+  const [resumeFile, setResumeFile] = useState(null);
+  const token = localStorage.getItem('token');
 
   useEffect(() => {
     const fetchJob = async () => {
@@ -27,13 +31,21 @@ function JobDetails() {
   const handleApply = async () => {
     const token = localStorage.getItem('token');
     if (!token) {
-      navigate('/login');
+      navigate('/login', { state: { from: location.pathname } });
+      return;
+    }
+    if (!resumeFile) {
+      setApplyMessage('Please select a resume file');
       return;
     }
     try {
+      const formData = new FormData();
+      formData.append('jobId', id);
+      formData.append('resume', resumeFile);
+
       await axios.post(
         'http://localhost:5000/api/applications',
-        { jobId: id },
+        formData,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setApplyMessage('Applied successfully!');
@@ -52,7 +64,21 @@ function JobDetails() {
       <p><strong>Type:</strong> {job.jobType} | <strong>Salary:</strong> ${job.salary}</p>
       <p style={{ marginTop: '1rem' }}>{job.description}</p>
 
-     <button className="btn" onClick={handleApply} style={{ marginTop: '1.5rem' }}>
+      {token && (
+        <div style={{ marginTop: '1rem' }}>
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+            Upload Resume
+          </label>
+          <input
+            type="file"
+            accept=".pdf,.doc,.docx"
+            onChange={(e) => setResumeFile(e.target.files[0])}
+            style={{ display: 'block' }}
+          />
+        </div>
+      )}
+
+      <button className="btn" onClick={handleApply} style={{ marginTop: '1.5rem' }}>
         Apply
       </button>
 

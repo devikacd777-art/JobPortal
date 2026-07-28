@@ -75,6 +75,14 @@ function RecruiterDashboard() {
       alert('Failed to load applicants');
     }
   };
+const updateStatus = async (appId, status, jobId) => {
+    try {
+      await axios.put(`http://localhost:5000/api/applications/${appId}/status`, { status }, { headers });
+      viewApplicants(jobId);
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to update status');
+    }
+  };
 
   if (loading) return <p className="page">Loading your jobs...</p>;
   if (error) return <p className="page" style={{ color: 'var(--danger)' }}>{error}</p>;
@@ -131,7 +139,21 @@ function RecruiterDashboard() {
                   <strong>Applicants:</strong>
                   {applicants.length === 0 && <p>No applicants yet.</p>}
                   {applicants.map((app) => (
-                    <p key={app._id}>{app.applicant.name} ({app.applicant.email}) — {app.status}</p>
+                    <div key={app._id} style={{ marginBottom: '0.75rem' }}>
+                      <p style={{ margin: 0 }}>
+                        {app.applicant.name} ({app.applicant.email}) — <strong>{app.status}</strong>
+                      </p>
+                      {app.resumeUrl && (
+                        <a href={`http://localhost:5000${app.resumeUrl}`} target="_blank" rel="noreferrer">
+                          View Resume
+                        </a>
+                      )}
+                      <div style={{ marginTop: '0.25rem' }}>
+                        <button className="btn" onClick={() => updateStatus(app._id, 'accepted', job._id)}>Accept</button>{' '}
+                        <button className="btn btn-danger" onClick={() => updateStatus(app._id, 'rejected', job._id)}>Reject</button>{' '}
+                        <button className="btn btn-secondary" onClick={() => updateStatus(app._id, 'reviewed', job._id)}>Mark Reviewed</button>
+                      </div>
+                    </div>
                   ))}
                 </div>
               )}

@@ -16,7 +16,7 @@ function Navbar() {
     Job<span style={{ color: '#60a5fa' }}>Portal</span>
 </Link>
       <div className="navbar-links">
-        <Link to="/">Jobs</Link>
+        {(!user || user.role === 'jobseeker') && <Link to="/">Jobs</Link>}
         {user ? (
           <>
           {user.role === 'jobseeker' && (
